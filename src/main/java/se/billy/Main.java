@@ -1,21 +1,16 @@
 package se.billy;
 
-import se.billy.context.Bootstrapper;
-import se.billy.git.domain.GitRepo;
+import se.billy.infra.Config;
+import se.billy.infra.context.Bootstrapper;
 
-import java.util.List;
-
-import static se.billy.context.Factories.factories;
+import static se.billy.infra.context.Stubs.noStubs;
 
 public class Main {
 
-    public static void main(String[] args) {
-        var config = Config.fromSystemProperties();
-        var context = Bootstrapper.bootstrap(config, factories());
+    public static void main() {
+        var config = Config.fromConfigFile();
+        var app = Bootstrapper.bootstrap(config, noStubs());
 
-        context.gitService.reposForUsers(List.of("Billy", "Maria"))
-                .stream()
-                .map(GitRepo::name)
-                .forEach(System.out::println);
+        app.start();
     }
 }
