@@ -30,7 +30,7 @@ public interface MusicService extends Loggable {
 
                             var wikipediaArticleFuture = musicBrainzInfo.optionalWikipediaTitle()
                                     .map(wikipediaClient::fetchWikipage)
-                                    .orElse(CompletableFuture.completedFuture(Optional.empty()));
+                                    .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
 
                             return wikipediaArticleFuture.thenCombine(coverArtsFuture,
                                     (wikipediaArticle, coverArts) -> ArtistInfo.from(musicBrainzInfo, wikipediaArticle, coverArts)
