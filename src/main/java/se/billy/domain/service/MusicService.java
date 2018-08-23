@@ -8,7 +8,8 @@ import se.billy.domain.external.musicbrainz.MusicBrainzClient;
 import se.billy.domain.external.musicbrainz.domain.MusicBrainzInfo;
 import se.billy.domain.external.wikipedia.WikipediaClient;
 import se.billy.domain.external.wikipedia.domain.WikipediaArticle;
-import se.billy.infra.function.Futures;
+import se.billy.infra.function.Optionals;
+import se.billy.infra.future.Futures;
 import se.billy.infra.logging.Loggable;
 
 import java.util.List;
@@ -23,30 +24,25 @@ public interface MusicService extends Loggable {
         return new MusicService() {
             @Override
             public CompletableFuture<ArtistInfo> infoForArtist(ArtistId id) {
-                return infoForArtistThrows(id);
-            }
-
-            private CompletableFuture<ArtistInfo> infoForArtistThrows(ArtistId id) {
                 return musicBrainzClient.fetchInfoById(id)
                         .thenCompose(musicBrainzInfo -> {
-                            var wikipageFuture = fetchWikiarticle(musicBrainzInfo);
+                            var wikipediaArticleFuture = fetchWikiarticle(musicBrainzInfo);
+                            var coverArtsFuture = fetchCoverArtsForArtist(musicBrainzInfo);
 
-                            List<CompletableFuture<Optional<CoverArt>>> albumsResponsesFutures = musicBrainzInfo.releaseGroups.stream()
-                                    .filter(it -> "Album".equals(it.primaryType))
-                                    .map(it -> coverArtClient.fetchAlbumArtById(it.getId()))
-                                    .collect(Collectors.toList());
-
-                            var albumsFuture = Futures.sequence(albumsResponsesFutures)
-                                    .thenApply(it -> it.stream()
-                                                        .flatMap(Optional::stream)
-                                                        .collect(Collectors.toList())
-                                    );
-
-                            return albumsFuture.thenCombine(
-                                    wikipageFuture,
-                                    (albums, wikipage) -> ArtistInfo.from(musicBrainzInfo, wikipage, albums)
+                            return wikipediaArticleFuture.thenCombine(coverArtsFuture,
+                                    (wikipediaArticle, coverArts) -> ArtistInfo.from(musicBrainzInfo, wikipediaArticle, coverArts)
                             );
                         });
+            }
+
+            private CompletableFuture<List<CoverArt>> fetchCoverArtsForArtist(MusicBrainzInfo musicBrainzInfo) {
+                List<CompletableFuture<Optional<CoverArt>>> coverArtResponsesFutures = musicBrainzInfo.releaseGroups.stream()
+                        .filter(it -> "Album".equals(it.primaryType))
+                        .map(it -> coverArtClient.fetchAlbumArtById(it.getId()))
+                        .collect(Collectors.toList());
+
+                return Futures.awaitAll(coverArtResponsesFutures)
+                        .thenApply(Optionals::removeEmpties);
             }
 
             private CompletableFuture<Optional<WikipediaArticle>> fetchWikiarticle(MusicBrainzInfo musicBrainzInfo) {
