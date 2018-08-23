@@ -32,13 +32,6 @@ public class Config {
 
     public static Config fromConfigFile() {
         Properties props = new Properties();
-        /*
-        try(var is = Config.class.getResourceAsStream("/config.properties")) {
-            props.load(is);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load properteis", e);
-        }
-         */
 
         props.putAll(Map.of(
                 "wikipediaUrl", "https://en.wikipedia.org/w/api.php",
