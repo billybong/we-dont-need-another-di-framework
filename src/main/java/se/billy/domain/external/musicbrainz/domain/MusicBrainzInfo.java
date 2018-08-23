@@ -5,6 +5,7 @@ import se.billy.domain.ArtistId;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 public class MusicBrainzInfo {
     public String id;
@@ -13,6 +14,13 @@ public class MusicBrainzInfo {
     @JsonProperty("release-groups")
     public List<ReleaseGroup> releaseGroups;
 
+    public Optional<String> optionalWikipediaTitle() {
+        return relations.stream()
+                .filter(relation -> "wikipedia".equals(relation.type))
+                .map(relation -> relation.url.resource.getPath().split("/"))
+                .map(array -> array[array.length - 1])
+                .findFirst();
+    }
 
     public static class Relations{
         public String type;

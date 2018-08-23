@@ -7,7 +7,6 @@ import se.billy.domain.external.coverart.domain.CoverArt;
 import se.billy.domain.external.musicbrainz.MusicBrainzClient;
 import se.billy.domain.external.musicbrainz.domain.MusicBrainzInfo;
 import se.billy.domain.external.wikipedia.WikipediaClient;
-import se.billy.domain.external.wikipedia.domain.WikipediaArticle;
 import se.billy.infra.function.Optionals;
 import se.billy.infra.future.Futures;
 import se.billy.infra.logging.Loggable;
@@ -26,8 +25,12 @@ public interface MusicService extends Loggable {
             public CompletableFuture<ArtistInfo> infoForArtist(ArtistId id) {
                 return musicBrainzClient.fetchInfoById(id)
                         .thenCompose(musicBrainzInfo -> {
-                            var wikipediaArticleFuture = fetchWikiarticle(musicBrainzInfo);
+
                             var coverArtsFuture = fetchCoverArtsForArtist(musicBrainzInfo);
+
+                            var wikipediaArticleFuture = musicBrainzInfo.optionalWikipediaTitle()
+                                    .map(wikipediaClient::fetchWikipage)
+                                    .orElse(CompletableFuture.completedFuture(Optional.empty()));
 
                             return wikipediaArticleFuture.thenCombine(coverArtsFuture,
                                     (wikipediaArticle, coverArts) -> ArtistInfo.from(musicBrainzInfo, wikipediaArticle, coverArts)
@@ -43,17 +46,6 @@ public interface MusicService extends Loggable {
 
                 return Futures.awaitAll(coverArtResponsesFutures)
                         .thenApply(Optionals::removeEmpties);
-            }
-
-            private CompletableFuture<Optional<WikipediaArticle>> fetchWikiarticle(MusicBrainzInfo musicBrainzInfo) {
-                var mayWikiTitle = musicBrainzInfo.relations.stream()
-                        .filter(it -> "wikipedia".equals(it.type))
-                        .map(it -> it.url.resource.getPath().split("/"))
-                        .map(array -> array[array.length-1])
-                        .findFirst();
-
-                return mayWikiTitle.map(wikipediaClient::fetchWikipage)
-                        .orElse(CompletableFuture.completedFuture(Optional.empty()));
             }
         };
     }
