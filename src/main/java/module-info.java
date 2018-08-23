@@ -1,10 +1,10 @@
 module musicserver {
     requires jdk.incubator.httpclient;
-    requires spark.core;
     requires com.fasterxml.jackson.databind;
     requires java.sql;
     requires jackson.annotations;
     requires com.fasterxml.jackson.core;
+    requires javalin;
 
     exports se.billy.domain.external.musicbrainz.domain;
     opens se.billy.domain.external.musicbrainz.domain;

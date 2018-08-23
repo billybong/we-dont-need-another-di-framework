@@ -7,10 +7,10 @@ import static se.billy.infra.context.Stubs.noStubs;
 
 public class Main {
 
-    public static void main() {
+    public static void main(String[] args) {
         var config = Config.fromConfigFile();
         var app = Bootstrapper.bootstrap(config, noStubs());
 
-        app.start();
+        app.start(config.port);
     }
 }

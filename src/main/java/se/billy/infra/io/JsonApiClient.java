@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static se.billy.infra.function.ExceptionalFunctions.propagatingException;
+import static se.billy.infra.function.ExceptionalFunctions.rethrowsAsRuntime;
 
 public class JsonApiClient {
     private final ObjectMapper om;
@@ -23,7 +23,7 @@ public class JsonApiClient {
     }
 
     public <T> CompletableFuture<Optional<T>> fetch(String uriString, Class<T> returnType) {
-        var uri = propagatingException(URI::create).apply(uriString);
+        var uri = rethrowsAsRuntime(URI::create, RuntimeException::new).apply(uriString);
         var req = HttpRequest.newBuilder(uri).GET().build();
 
         return httpClient.sendAsync(req, HttpResponse.BodyHandler.asInputStream())

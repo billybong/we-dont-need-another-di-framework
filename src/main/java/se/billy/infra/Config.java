@@ -9,6 +9,8 @@ public class Config {
     public final String wikipediaUrl;
     public final String musicBrainzUrl;
     public final String coverArtUrl;
+    public final int port;
+
     private Properties properties;
 
     private Config(Properties properties) {
@@ -18,6 +20,7 @@ public class Config {
             wikipediaUrl =      property("wikipediaUrl");
             musicBrainzUrl =    property("musicBrainzUrl");
             coverArtUrl =       property("coverArtUrl");
+            port =              property("port", Integer::valueOf);
         } catch (Exception e) {
             throw new IllegalArgumentException("Bootstrapping config failed", e);
         }
@@ -40,7 +43,8 @@ public class Config {
         props.putAll(Map.of(
                 "wikipediaUrl", "https://en.wikipedia.org/w/api.php",
                 "musicBrainzUrl", "http://musicbrainz.org",
-                "coverArtUrl", "http://coverartarchive.org"
+                "coverArtUrl", "http://coverartarchive.org",
+                "port", "8080"
         ));
 
         return new Config(props);
