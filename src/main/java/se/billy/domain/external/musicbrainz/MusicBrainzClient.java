@@ -12,7 +12,7 @@ public interface MusicBrainzClient {
 
     static MusicBrainzClient musicBrainzClient(JsonApiClient client, String musicBrainzUrl) {
         return id -> {
-            var uriString = String.format("%s/ws/2/artist/%s?&fmt=json&inc=url-rels+release-groups", musicBrainzUrl, id.value());
+            String uriString = String.format("%s/ws/2/artist/%s?&fmt=json&inc=url-rels+release-groups", musicBrainzUrl, id.value());
             return client.fetch(uriString, MusicBrainzInfo.class)
                     .thenApply(it -> it.orElseThrow(()-> new RuntimeException("Could find any MusicBrainzInfo")));
         };

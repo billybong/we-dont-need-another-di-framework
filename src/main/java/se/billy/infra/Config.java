@@ -33,12 +33,11 @@ public class Config {
     public static Config fromConfigFile() {
         Properties props = new Properties();
 
-        props.putAll(Map.of(
-                "wikipediaUrl", "https://en.wikipedia.org/w/api.php",
-                "musicBrainzUrl", "http://musicbrainz.org",
-                "coverArtUrl", "http://coverartarchive.org",
-                "port", "8080"
-        ));
+        props.put("wikipediaUrl", "https://en.wikipedia.org/w/api.php");
+                props.put("musicBrainzUrl", "http://musicbrainz.org");
+                props.put("coverArtUrl", "http://coverartarchive.org");
+                props.put("port", "8080");
+
 
         return new Config(props);
     }

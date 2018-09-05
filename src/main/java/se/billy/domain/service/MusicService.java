@@ -7,6 +7,7 @@ import se.billy.domain.external.coverart.domain.CoverArt;
 import se.billy.domain.external.musicbrainz.MusicBrainzClient;
 import se.billy.domain.external.musicbrainz.domain.MusicBrainzInfo;
 import se.billy.domain.external.wikipedia.WikipediaClient;
+import se.billy.domain.external.wikipedia.domain.WikipediaArticle;
 import se.billy.infra.function.Optionals;
 import se.billy.infra.future.Futures;
 import se.billy.infra.logging.Loggable;
@@ -26,9 +27,9 @@ public interface MusicService extends Loggable {
                 return musicBrainzClient.fetchInfoById(id)
                         .thenCompose(musicBrainzInfo -> {
 
-                            var coverArtsFuture = fetchCoverArtsForArtist(musicBrainzInfo);
+                            CompletableFuture<List<CoverArt>> coverArtsFuture = fetchCoverArtsForArtist(musicBrainzInfo);
 
-                            var wikipediaArticleFuture = musicBrainzInfo.optionalWikipediaTitle()
+                            CompletableFuture<Optional<WikipediaArticle>> wikipediaArticleFuture = musicBrainzInfo.optionalWikipediaTitle()
                                     .map(wikipediaClient::fetchWikipage)
                                     .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()));
 

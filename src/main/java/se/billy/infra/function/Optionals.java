@@ -7,7 +7,8 @@ import java.util.stream.Collectors;
 public class Optionals {
     public static <T> List<T> removeEmpties(List<Optional<T>> optionals) {
         return optionals.stream()
-                .flatMap(Optional::stream)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
     }
 }

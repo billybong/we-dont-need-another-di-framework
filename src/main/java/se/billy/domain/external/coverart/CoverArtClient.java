@@ -13,7 +13,7 @@ public interface CoverArtClient {
 
     static CoverArtClient coverArtClient(JsonApiClient httpClient, String coverArtUrl){
         return id -> {
-            var uri = String.format("%s/release-group/%s", coverArtUrl, id.value());
+            String uri = String.format("%s/release-group/%s", coverArtUrl, id.value());
             return httpClient.fetch(uri, CoverArt.class);
         };
     }

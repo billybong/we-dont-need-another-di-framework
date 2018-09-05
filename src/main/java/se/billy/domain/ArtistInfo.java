@@ -17,7 +17,7 @@ public class ArtistInfo {
     private ArtistInfo() { }
 
     public static ArtistInfo from(MusicBrainzInfo musicBrainzInfo, Optional<WikipediaArticle> wikiArticle, List<CoverArt> albums) {
-        var artistInfo = new ArtistInfo();
+        ArtistInfo artistInfo = new ArtistInfo();
 
         artistInfo.id = musicBrainzInfo.id;
         artistInfo.info = wikiArticle.map(it -> it.query.pages.values().iterator().next().text).orElse(null);

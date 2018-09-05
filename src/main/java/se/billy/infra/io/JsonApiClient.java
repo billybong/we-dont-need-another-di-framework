@@ -1,51 +1,45 @@
 package se.billy.infra.io;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.incubator.http.HttpClient;
-import jdk.incubator.http.HttpRequest;
-import jdk.incubator.http.HttpResponse;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Request;
+import org.asynchttpclient.RequestBuilder;
+import org.asynchttpclient.Response;
+import se.billy.infra.logging.Loggable;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static se.billy.infra.function.ExceptionalFunctions.rethrowsAsRuntime;
-
-public class JsonApiClient {
+public class JsonApiClient implements Loggable {
     private final ObjectMapper om;
-    private final HttpClient httpClient;
+    private final AsyncHttpClient httpClient;
 
-    public JsonApiClient(ObjectMapper om, HttpClient httpClient) {
+    public JsonApiClient(ObjectMapper om, AsyncHttpClient httpClient) {
         this.om = om;
         this.httpClient = httpClient;
     }
 
-    public <T> CompletableFuture<Optional<T>> fetch(String uriString, Class<T> returnType) {
-        var uri = rethrowsAsRuntime(URI::create, RuntimeException::new).apply(uriString);
-        var req = HttpRequest.newBuilder(uri).GET().build();
+    public <T> CompletableFuture<Optional<T>> fetch(String uri, Class<T> clazz) {
+        Request req = new RequestBuilder().setUrl(uri).build();
+        long start = System.currentTimeMillis();
+        log("Requesting " + clazz.getName());
 
-        return httpClient.sendAsync(req, HttpResponse.BodyHandler.asInputStream())
+        return httpClient.executeRequest(req).toCompletableFuture()
                 .thenApply(response -> {
-                    if(response.statusCode() == 404){
+                    log("Response for " + clazz.getName() + " took " + (System.currentTimeMillis() - start) + " ms");
+                    if (response.getStatusCode() == 404) {
                         return Optional.empty();
+                    } else {
+                        return Optional.of(this.parse(response, clazz));
                     }
-                    validateResponse(response);
-                    return Optional.of(parse(response.body(), returnType));
                 });
     }
 
-    private void validateResponse(HttpResponse<InputStream> response) {
-        int statusCode = response.statusCode();
-        if(statusCode > 399){
-            throw new RuntimeException("Failed to query " + response.request().uri() + " status code: " + statusCode);
-        }
-    }
-
-    private <T> T parse(InputStream body, Class<T> type) {
+    private <T> T parse(Response response, Class<T> clazz) {
         try {
-            return om.readValue(body, type);
+            String responseBody = response.getResponseBody();
+            return om.readValue(responseBody, clazz);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

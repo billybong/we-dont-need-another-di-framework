@@ -13,7 +13,7 @@ public interface WikipediaClient {
         return new WikipediaClient() {
             @Override
             public CompletableFuture<Optional<WikipediaArticle>> fetchWikipage(String title) {
-                var uri = String.format("%s?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=%s", baseUrl, title);
+                String uri = String.format("%s?action=query&format=json&prop=extracts&exintro=true&redirects=true&titles=%s", baseUrl, title);
                 return apiClient.fetch(uri, WikipediaArticle.class);
             }
         };
