@@ -18,19 +18,19 @@ import java.util.concurrent.ExecutionException;
 import static se.billy.infra.Config.fromConfigFile;
 import static se.billy.infra.context.Stubs.noStubs;
 
-public class LambdaEndpoint implements RequestHandler<Object, AwsHttpResponse> {
+public class LambdaEndpoint implements RequestHandler<Object, AwsHttpResponse<ArtistInfo>> {
 
     private final static MusicService service = Bootstrapper.bootstrap(fromConfigFile(), noStubs());
     private final static String NIRVANA = "5b11f4ce-a62d-471e-81fc-a69a8278c7da";
 
     @Override
-    public AwsHttpResponse handleRequest(Object input, Context context) {
+    public AwsHttpResponse<ArtistInfo> handleRequest(Object input, Context context) {
         ArtistInfo artistInfo = service.infoForArtist(ArtistId.from(NIRVANA)).join();
         return AwsHttpResponse.ok(artistInfo);
     }
 
     public static void main(String[] args) throws JsonProcessingException {
-        AwsHttpResponse artistInfo = new LambdaEndpoint().handleRequest(null, null);
+        AwsHttpResponse<ArtistInfo> artistInfo = new LambdaEndpoint().handleRequest(null, null);
         System.out.println(new ObjectMapper().writeValueAsString(artistInfo));
     }
 }

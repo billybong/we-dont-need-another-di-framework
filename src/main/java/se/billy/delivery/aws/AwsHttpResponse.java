@@ -6,11 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class AwsHttpResponse {
+public final class AwsHttpResponse<T> {
     private static final ObjectMapper om = new ObjectMapper();
-    private final int statusCode;
-    private final Map<String, String> headers = new HashMap<>();
-    private final String body;
+
+    public final int statusCode;
+    public final Map<String, String> headers = new HashMap<>();
+    public final String body;
+    public final boolean isBase64Encoded = false;
 
     private AwsHttpResponse(String body, int statusCode) {
         this.body = body;
@@ -18,34 +20,20 @@ public final class AwsHttpResponse {
         headers.put("Content-Type", "application/json");
     }
 
-    public static AwsHttpResponse ok(Object body){
+    public static <T> AwsHttpResponse<T> ok(T body){
         return withStatus(body, 200);
     }
 
-    public static  AwsHttpResponse error(Object body){
+    public static <T> AwsHttpResponse<T> error(T body){
         return withStatus(body, 503);
     }
 
-    public static AwsHttpResponse withStatus(Object body, int status){
+    public static <T> AwsHttpResponse<T> withStatus(T body, int status){
         try {
             String json = om.writeValueAsString(body);
-            return new AwsHttpResponse(json, status);
+            return new AwsHttpResponse<T>(json, status);
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(e);
         }
     }
-
-    public String getBody() {
-        return body;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public boolean getIsBase64Encoded(){ return false;}
 }
