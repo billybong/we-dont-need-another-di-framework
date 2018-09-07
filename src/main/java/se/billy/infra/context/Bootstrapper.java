@@ -2,10 +2,11 @@ package se.billy.infra.context;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.incubator.http.HttpClient;
 import se.billy.infra.Config;
 import se.billy.infra.MusicServer;
 import se.billy.infra.io.JsonApiClient;
+
+import java.net.http.HttpClient;
 
 import static se.billy.domain.external.coverart.CoverArtClient.coverArtClient;
 import static se.billy.domain.external.musicbrainz.MusicBrainzClient.musicBrainzClient;

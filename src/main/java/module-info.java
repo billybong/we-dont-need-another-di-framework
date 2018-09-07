@@ -1,5 +1,5 @@
 module musicserver {
-    requires jdk.incubator.httpclient;
+    requires java.net.http;
     requires com.fasterxml.jackson.databind;
     requires java.sql;
     requires jackson.annotations;

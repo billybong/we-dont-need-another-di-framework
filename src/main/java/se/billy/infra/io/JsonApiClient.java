@@ -1,13 +1,13 @@
 package se.billy.infra.io;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.incubator.http.HttpClient;
-import jdk.incubator.http.HttpRequest;
-import jdk.incubator.http.HttpResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -26,7 +26,7 @@ public class JsonApiClient {
         var uri = rethrowsAsRuntime(URI::create, RuntimeException::new).apply(uriString);
         var req = HttpRequest.newBuilder(uri).GET().build();
 
-        return httpClient.sendAsync(req, HttpResponse.BodyHandler.asInputStream())
+        return httpClient.sendAsync(req, HttpResponse.BodyHandlers.ofInputStream())
                 .thenApply(response -> {
                     if(response.statusCode() == 404){
                         return Optional.empty();

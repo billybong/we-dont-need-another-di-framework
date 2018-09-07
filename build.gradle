@@ -59,3 +59,15 @@ afterEvaluate {
         }
     }
 }
+
+jib {
+    from {
+        image = 'openjdk:11-jre-slim'
+    }
+    to {
+        image = 'billy/jib-azure'
+    }
+    container {
+        ports = ['8080']
+    }
+}
